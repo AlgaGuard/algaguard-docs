@@ -1,6 +1,6 @@
 # Service and repository boundaries
 
-Status: planned interfaces; exact OpenAPI/AsyncAPI schemas are a Phase 2 deliverable.
+Status: planned interfaces. Phase 2 base contracts and Phase 2.1 WebSocket contracts are defined; runtime services remain planned.
 
 ## Shared service rules
 
@@ -8,16 +8,29 @@ Status: planned interfaces; exact OpenAPI/AsyncAPI schemas are a Phase 2 deliver
 - Deployment: independently versioned container image. Pilot co-location/combination is allowed without shared-table access.
 - Common HTTP: planned `/health/live`, `/health/ready`, and documented versioned API routes where public/internal HTTP applies.
 - CI: planned GitHub Actions build, lint, test, contract check, dependency/container scan, and GHCR publish. No workflow is created in Phase 1.
-- MQTT topics are namespaced per environment and device; illustrative logical names below require Phase 2 contract approval.
+- MQTT topics are namespaced per environment and device according to the Phase 2 contract.
+- WebSocket is non-durable live delivery only. HTTPS is authoritative for initial state, history, recovery, and user-created commands.
 
 ## `algaguard-api-gateway`
 
-- Purpose: public client entry, JWT validation, rate limiting, routing, correlation IDs, SSE/WebSocket entry.
+- Purpose: public client entry, JWT validation, rate limiting, routing, correlation IDs, and short-lived one-time WebSocket ticket issuance.
 - Owned data: no business system of record; short-lived rate/session state in Redis.
 - Incoming: HTTPS from web/mobile. Outgoing: internal HTTP to services and OIDC validation to Keycloak.
 - MQTT/events: none directly. HTTP: `/api/v1/*`, `/events`; exact routes `TBD`.
 - Image: `ghcr.io/algaguard/algaguard-api-gateway`. Phase 7.
 - Pilot role: one client entry. Scale role: horizontally scalable policy/routing layer.
+
+## `algaguard-realtime-service` - planned
+
+- Purpose: authenticated native RFC 6455 WSS connections, Access Service-authorized organization/device/current-user subscriptions, schema validation, and non-durable live fan-out.
+- Technology: Node.js, TypeScript, a lightweight WebSocket library such as `ws`, Redis Pub/Sub, and OpenTelemetry.
+- Owned data: no authoritative business data; connection, subscription, ticket-consumption, and bounded delivery state only.
+- Incoming: WSS upgrades using one-time tickets and subscribe/unsubscribe/ping messages; Redis Pub/Sub notifications from authoritative services; authorization and revocation results from Access Service.
+- Outgoing: validated WebSocket events to React and Flutter; Access Service authorization checks; connection/subscription telemetry.
+- HTTP: health/readiness only plus internal integration as approved. MQTT: none. WebSocket contract: `algaguard-websocket-v1` in `algaguard-contracts`.
+- Image: `ghcr.io/algaguard/algaguard-realtime-service`. Implementation phase **TBD** after Phase 2.1; the repository is not created yet.
+- Pilot role: optional live dashboard updates after implementation. Scale role: independently scalable, bounded connections and queues with slow-client backpressure.
+- Authoritative data: none. TimescaleDB and service-owned PostgreSQL databases remain authoritative; clients recover through HTTPS after reconnect.
 
 ## `algaguard-device-service`
 

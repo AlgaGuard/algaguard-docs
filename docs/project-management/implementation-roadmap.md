@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-No phase after Phase 1 has started. Every repository below is planned unless it already exists outside this workspace.
+Phase 1 documentation and the Phase 2 contract foundation are complete. Phase 2.1 defines the WebSocket contract and architecture amendment; consumer and Realtime Service implementation remain planned. Phase 3 has not started. Every runtime repository below is planned unless it already exists outside this workspace.
 
 ## Phase 1 - Documentation, validation planning, cost, and capacity
 
@@ -27,6 +27,19 @@ No phase after Phase 1 has started. Every repository below is planned unless it 
 - **Free-pilot impact:** Enables one vertical slice without interface drift.
 - **Scale-target impact:** Provides stable partition/evolution keys.
 - **Out of scope:** Runtime services, UI, firmware features, deployment.
+
+## Phase 2.1 - Realtime WebSocket contracts and architecture
+
+- **Objective:** Define cloud-agnostic live updates for React and Flutter without replacing MQTT, HTTPS recovery, or HTTPS commands.
+- **Repositories:** `algaguard-contracts`, `algaguard-docs`; planned later `algaguard-realtime-service`.
+- **Dependencies:** Phase 2 base envelopes, service ownership, Keycloak/API Gateway authentication, and Access Service authorization boundaries.
+- **Main tasks:** WebSocket envelopes/events, subscribe/unsubscribe/ping, one-time ticket flow, per-resource authorization, Redis Pub/Sub fan-out, recovery, AsyncAPI, architecture, compatibility, and validation.
+- **Deliverables:** Versioned WebSocket schemas and examples, separate AsyncAPI document, protocol policies, Realtime Service architecture, client experience, and ADR-017.
+- **Acceptance criteria:** Contract checks and documentation validation pass; all event sources and authorization/recovery rules are explicit; no runtime implementation is created.
+- **Risks:** Token leakage, stale authorization, missed events, reconnect storms, slow clients, or treating live delivery as authoritative.
+- **Free-pilot impact:** Defines an optional later live-update path while HTTPS polling/recovery remains viable.
+- **Scale-target impact:** Establishes independently scalable connections, subscriptions, backpressure, and metrics; exact limits require evidence.
+- **Out of scope:** Creating `algaguard-realtime-service`, consumer code, firmware, deployment, and Phase 3.
 
 ## Phase 3 - Firmware foundation and board bring-up
 

@@ -1,6 +1,6 @@
 # System overview
 
-Status: Phase 1 target architecture; not implemented.
+Status: Phase 2.1 target architecture; not implemented.
 
 AlgaGuard combines a local offline-first device with web and mobile clients and a cloud-agnostic service platform. The one-device pilot, campus deployment, and full scale target are distinct capacity stages; see [scale target](scale-target.md).
 
@@ -55,6 +55,7 @@ flowchart TB
             OTA_SVC["OTA Service"]
             AUDIT_SVC["Audit Service"]
             INGESTION["MQTT Ingestion Service"]
+            REALTIME["Realtime Service"]
         end
 
         POSTGRES[("PostgreSQL")]
@@ -74,6 +75,7 @@ flowchart TB
     USER --> MOBILE
     WEB -->|"HTTPS"| NGINX
     MOBILE -->|"HTTPS"| NGINX
+    NGINX -->|"WSS"| REALTIME
     ESP -->|"MQTT TLS"| EMQX
     ESP -->|"HTTPS OTA"| NGINX
     NGINX --> API
@@ -86,6 +88,7 @@ flowchart TB
     API --> COMMAND_SVC
     API --> ALERT_SVC
     API --> OTA_SVC
+    API -->|"One-Time Ticket"| REALTIME
     EMQX -->|"Pilot Direct Path"| INGESTION
     INGESTION --> TELEMETRY_SVC
     COMMAND_SVC --> EMQX
@@ -103,6 +106,14 @@ flowchart TB
     AUDIT_SVC --> POSTGRES
     TELEMETRY_SVC --> TIMESCALE
     API --> REDIS
+    TELEMETRY_SVC -->|"Live Events"| REDIS
+    DEVICE_SVC -->|"Live Events"| REDIS
+    ALERT_SVC -->|"Live Events"| REDIS
+    COMMAND_SVC -->|"Live Events"| REDIS
+    PROFILE_SVC -->|"Live Events"| REDIS
+    OTA_SVC -->|"Live Events"| REDIS
+    NOTIFY_SVC -->|"Live Events"| REDIS
+    REDIS -->|"Non-Durable Fan-Out"| REALTIME
     OTA_SVC --> OBJECTS
     SERVICES --> OTEL
     OTEL --> PROM
@@ -127,10 +138,12 @@ flowchart TB
 ## Architectural rules
 
 - Device communication is MQTT over TLS; firmware downloads use HTTPS.
+- Browser and mobile live updates use WSS through the planned Realtime Service. HTTPS remains authoritative for state recovery and commands.
 - Human authentication is Keycloak OIDC. Devices use separate credentials or certificates.
+- Every WebSocket subscription is authorized through the Access Service; connection authentication alone grants no resource access.
 - The pilot uses direct MQTT ingestion. Kafka and Kubernetes are later targets.
 - Every service owns its data and does not query another service's tables directly.
 - Amazon S3 and SES are optional implementations behind [provider adapters](../backend/provider-adapters.md), not domain dependencies.
 - Migration changes infrastructure and DNS, not business logic or the ESP32 protocol.
 
-See [runtime architecture](runtime-architecture.md), [security](security-architecture.md), [cloud portability](cloud-portability.md), [ADR-014 for temporary AWS hosting](../decisions/ADR-014-aws-temporary-host.md), [ADR-015 for final campus hosting](../decisions/ADR-015-campus-final-host.md), and [ADR-016 for portable object storage](../decisions/ADR-016-s3-compatible-storage.md).
+See [runtime architecture](runtime-architecture.md), [Realtime Service](../backend/realtime-service.md), [security](security-architecture.md), [cloud portability](cloud-portability.md), [ADR-014 for temporary AWS hosting](../decisions/ADR-014-aws-temporary-host.md), [ADR-015 for final campus hosting](../decisions/ADR-015-campus-final-host.md), [ADR-016 for portable object storage](../decisions/ADR-016-s3-compatible-storage.md), and [ADR-017 for portable WebSocket delivery](../decisions/ADR-017-websocket-realtime-service.md).
