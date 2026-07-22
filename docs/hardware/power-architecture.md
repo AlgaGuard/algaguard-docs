@@ -2,6 +2,8 @@
 
 Status: conceptual only. It is not a construction-ready schematic or approved wiring plan.
 
+`SAFETY`: The platform-first prototype is USB-powered only. None of the 3S pack, charger, charge-while-operating path, battery percentage, divider, or ADC concepts below are implemented or approved. Keep this entire design behind the existing electrical review gate.
+
 ```mermaid
 flowchart LR
     C1["Samsung INR18650-25P Cell 1"]

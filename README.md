@@ -1,6 +1,6 @@
 # AlgaGuard Documentation
 
-AlgaGuard is a planned IoT platform for monitoring microalgae cultivation parameters. Phase 1 defines the product, hardware, firmware, cloud-agnostic platform, capacity, safety constraints, and delivery roadmap. Phase 2.1 adds the accepted portable WebSocket architecture for later React and Flutter live updates. It does not implement the product or the Realtime Service.
+AlgaGuard is an IoT platform for monitoring microalgae cultivation parameters. Phase 1 defines the product and safety boundaries, Phases 2 and 2.1 establish contracts, and the platform-first foundation implements the portable software vertical slice plus a minimum USB-powered firmware base. Production deployment and physical-device acceptance remain open.
 
 ## Phase 1 status
 
@@ -13,11 +13,16 @@ Phase 1 documentation foundation is complete. Hardware, electrical, scientific, 
 
 ## Phase 2.1 status
 
-Phase 2.1 WebSocket contracts and architecture are complete on `develop`. MQTT/TLS remains the ESP32 transport; HTTPS remains authoritative for queries, recovery, and commands; WSS provides non-durable live client updates. The planned `algaguard-realtime-service` is deferred to a later application phase, and Phase 3 has not started.
+Phase 2.1 WebSocket contracts and architecture are complete on `develop`. The platform-first phase subsequently implemented the Realtime Service and its React/Flutter consumers without changing the transport boundary: MQTT/TLS remains the ESP32 transport, HTTPS remains authoritative for queries, recovery, and commands, and WSS provides non-durable live client updates.
+
+## Platform-first foundation
+
+The portable Compose stack, service repositories, React dashboard, Flutter application, realtime path, onboarding/claim flow, OTA control plane, and USB-only ESP32-S3 foundation are implemented on their respective `develop` branches. Local automated validation proves the software vertical slice. AWS/campus deployment, real-board tests, signing-custody approval, battery/power safety, MicroSD electrical validation, and scientific thresholds remain open.
 
 ## Start here
 
 - [System overview](docs/architecture/system-overview.md)
+- [Platform-first foundation](docs/architecture/platform-first-foundation.md)
 - [Hardware inventory](docs/hardware/hardware-inventory.md)
 - [Preliminary pin plan](docs/hardware/preliminary-pin-plan.md)
 - [Firmware overview](docs/firmware/firmware-overview.md)
