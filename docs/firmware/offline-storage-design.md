@@ -1,6 +1,8 @@
 # Offline storage and batch design
 
-`CONFIRMED`: Generate and persist one sample per second, build a normal batch of about ten samples every ten seconds, and retain at least two days locally using the available 32 GB MicroSD card. A configurable ring policy controls retention; card capacity alone is not the policy.
+`CONFIRMED`: Generate one simulated sample per second and build a normal batch of about ten samples every ten seconds. The platform-first firmware retains unacknowledged data behind a queue abstraction using a RAM/NVS development adapter.
+
+`SAFETY`: The 32 GB MicroSD adapter is disabled until its electrical interface and physical wiring are validated. The two-day removable-storage goal below remains planned and must not be claimed from the RAM/NVS adapter.
 
 ```mermaid
 flowchart LR

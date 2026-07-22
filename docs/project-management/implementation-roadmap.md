@@ -1,6 +1,15 @@
 # Implementation roadmap
 
-Phase 1 documentation and the Phase 2 contract foundation are complete. Phase 2.1 defines the WebSocket contract and architecture amendment; consumer and Realtime Service implementation remain planned. Phase 3 has not started. Every runtime repository below is planned unless it already exists outside this workspace.
+Phase 1 documentation and the Phase 2/2.1 contract foundation are complete. A platform-first implementation has now delivered the portable application vertical slice and minimum USB-powered firmware foundation across the implementation repositories. The numbered roadmap below remains useful as a capability and physical-acceptance backlog; its original order no longer represents implementation chronology. See the [platform-first foundation](../architecture/platform-first-foundation.md) for delivered scope and evidence boundaries.
+
+## Platform-first foundation - portable software vertical slice
+
+- **Objective:** Prove onboarding, identity/access, simulated telemetry, durable storage, realtime delivery, commands, OTA control, clients, and portable infrastructure before hardware refinement.
+- **Repositories:** Infrastructure, service template, nine backend services, web dashboard, Flutter app, firmware, contracts, and documentation.
+- **Delivered:** Docker Compose stack, repository CI/CD, one-time QR claim, BLE provisioning abstractions, Keycloak login, EMQX/TimescaleDB/Redis/MinIO paths, WSS tickets, role-aware clients, signed-OTA pipeline definition, USB-only firmware modules, and automated development validation.
+- **Evidence:** Local service checks and the automated Compose vertical slice pass. Flutter analysis/tests and host firmware tests pass.
+- **Open gates:** AWS/campus hosts, production secrets and signing custody, real ESP32-S3 flashing/bench validation, Android package confirmation, battery/power review, MicroSD electrical validation, and scientific threshold approval.
+- **Safety:** No 3S battery, charger, battery percentage, power-path, or battery ADC work is included.
 
 ## Phase 1 - Documentation, validation planning, cost, and capacity
 
