@@ -11,6 +11,16 @@ Phase 1 documentation and the Phase 2/2.1 contract foundation are complete. A pl
 - **Open gates:** AWS/campus hosts, production secrets and signing custody, real ESP32-S3 flashing/bench validation, Android package confirmation, battery/power review, MicroSD electrical validation, and scientific threshold approval.
 - **Safety:** No 3S battery, charger, battery percentage, power-path, or battery ADC work is included.
 
+## Device identity resolution sprint - completed on `develop`
+
+- **Objective:** Resolve the canonical MQTT identifier and UUID WebSocket resource boundary without changing released v1 contracts or creating WebSocket v2.
+- **Repositories:** Contracts, Device, Access, MQTT Ingestion, Telemetry, Realtime, Infrastructure, and documentation.
+- **Delivered:** Immutable canonical `deviceId`, stable internal `deviceUuid`, backend-owned organization context, monotonic ownership version/history, authenticated context resolution, UUID authorization, organization-at-ingest persistence, post-commit events, and UUID/org realtime routing.
+- **Evidence:** Contract/service validation and hosted CI pass. A fresh-volume Compose test covers migrations, negative identities, normal authorized delivery, cross-organization denial, five-service restart, transfer/revocation, historical no-leak, stale-version rejection, and duplicate replay.
+- **Compatibility:** MQTT v1 remains canonical-ID based; WebSocket v1 subscriptions remain UUID based; compatible v1.1 telemetry events carry both identifiers; released v1 files are unchanged.
+- **Open gates:** Production cache/load tuning, deployment-specific service credentials, and any broader pre-transfer audit-history policy. AWS, campus, web/mobile/firmware follow-on work is not part of this sprint.
+- **Decision:** [ADR-018](../decisions/ADR-018-dual-device-identity.md).
+
 ## Phase 1 - Documentation, validation planning, cost, and capacity
 
 - **Objective:** Establish reviewed decisions and safe implementation gates.

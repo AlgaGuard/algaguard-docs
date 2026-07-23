@@ -1,6 +1,6 @@
 # System overview
 
-Status: Phase 2.1 target architecture; not implemented.
+Status: software foundation implemented on `develop`; production deployment and physical acceptance remain open.
 
 AlgaGuard combines a local offline-first device with web and mobile clients and a cloud-agnostic service platform. The one-device pilot, campus deployment, and full scale target are distinct capacity stages; see [scale target](scale-target.md).
 
@@ -138,12 +138,15 @@ flowchart TB
 ## Architectural rules
 
 - Device communication is MQTT over TLS; firmware downloads use HTTPS.
-- Browser and mobile live updates use WSS through the planned Realtime Service. HTTPS remains authoritative for state recovery and commands.
+- Browser and mobile live updates use WSS through the Realtime Service. HTTPS remains authoritative for state recovery and commands.
 - Human authentication is Keycloak OIDC. Devices use separate credentials or certificates.
 - Every WebSocket subscription is authorized through the Access Service; connection authentication alone grants no resource access.
+- Firmware, QR, and MQTT use immutable canonical `deviceId`; REST, authorization, and WebSocket resources use internal `deviceUuid`.
+- Device Service is the mapping authority. Only trusted backend services add `organizationId`, and ownership changes increment `ownershipVersion`.
+- Telemetry retains `organizationIdAtIngest`; ownership transfer does not rewrite or automatically expose historical rows.
 - The pilot uses direct MQTT ingestion. Kafka and Kubernetes are later targets.
 - Every service owns its data and does not query another service's tables directly.
 - Amazon S3 and SES are optional implementations behind [provider adapters](../backend/provider-adapters.md), not domain dependencies.
 - Migration changes infrastructure and DNS, not business logic or the ESP32 protocol.
 
-See [runtime architecture](runtime-architecture.md), [Realtime Service](../backend/realtime-service.md), [security](security-architecture.md), [cloud portability](cloud-portability.md), [ADR-014 for temporary AWS hosting](../decisions/ADR-014-aws-temporary-host.md), [ADR-015 for final campus hosting](../decisions/ADR-015-campus-final-host.md), [ADR-016 for portable object storage](../decisions/ADR-016-s3-compatible-storage.md), and [ADR-017 for portable WebSocket delivery](../decisions/ADR-017-websocket-realtime-service.md).
+See [runtime architecture](runtime-architecture.md), [Realtime Service](../backend/realtime-service.md), [security](security-architecture.md), [cloud portability](cloud-portability.md), [ADR-014 for temporary AWS hosting](../decisions/ADR-014-aws-temporary-host.md), [ADR-015 for final campus hosting](../decisions/ADR-015-campus-final-host.md), [ADR-016 for portable object storage](../decisions/ADR-016-s3-compatible-storage.md), [ADR-017 for portable WebSocket delivery](../decisions/ADR-017-websocket-realtime-service.md), and [ADR-018 for dual device identity](../decisions/ADR-018-dual-device-identity.md).

@@ -39,7 +39,7 @@ flowchart TB
 
 Use one AWS Linux EC2 VM with Docker Compose first. Consider single-node k3s only after the Compose stack is stable and only when Kubernetes learning is an explicit objective. Do not deploy EKS, MSK, or Kafka for this pilot.
 
-**CONFIRMED Phase 2.1:** The planned Realtime Service runs as the same portable container used on campus. NGINX terminates/routes WSS, and Redis Pub/Sub supplies non-durable live fan-out. Do not introduce AWS API Gateway WebSocket APIs or AppSync as core dependencies. The stable product WSS domain and operational connection limits are **TBD**.
+**CONFIRMED:** The implemented Realtime Service is portable to the same container runtime intended for campus. NGINX terminates/routes WSS, and Redis Pub/Sub supplies non-durable live fan-out. Do not introduce AWS API Gateway WebSocket APIs or AppSync as core dependencies. AWS deployment, the stable product WSS domain, and operational connection limits are **TBD**.
 
 `ASSUMPTION`: Local measurements will determine whether a small VM can host all logical components. Logical microservice boundaries may be combined into fewer pilot containers without merging data ownership or contracts. A small instance might not run Keycloak, databases, EMQX, observability, and all services comfortably.
 
