@@ -91,4 +91,3 @@ Before deployment, record approved values for:
 6. Temporary URL exposure and OTA rollout duration.
 
 **TBD:** Values must be supplied through deployment configuration or firmware build profiles and verified in load/failure tests. “Unlimited” is not an accepted production placeholder.
-

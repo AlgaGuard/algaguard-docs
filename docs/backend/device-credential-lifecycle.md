@@ -205,4 +205,3 @@ Device Service exposes service-authenticated counters for mTLS acceptance, crede
 - **ASSUMPTION:** Production limit values will be selected from load, security, and recovery evidence; development defaults are not capacity or scientific approval.
 
 See [transport security limits](../architecture/transport-security-limits.md) for every current configuration boundary.
-

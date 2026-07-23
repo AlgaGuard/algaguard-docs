@@ -92,4 +92,3 @@ These alternatives weaken isolation, make ownership transfer unsafe, expose key 
 - [Security architecture](../architecture/security-architecture.md)
 - [ADR-003: MQTT device communication](ADR-003-mqtt-device-communication.md)
 - [ADR-018: Dual device identity](ADR-018-dual-device-identity.md)
-
