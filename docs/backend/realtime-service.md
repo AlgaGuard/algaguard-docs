@@ -1,8 +1,8 @@
 # Realtime Service
 
-Status: **CONFIRMED Phase 2.1 architecture; planned and not implemented.**
+Status: **CONFIRMED architecture and identity-aware implementation on `develop`. Production deployment and load limits remain open.**
 
-The planned `algaguard-realtime-service` provides live React and Flutter updates without changing the device protocol or becoming a system of record. It is an independently deployable Node.js and TypeScript service using native RFC 6455 WebSockets through a lightweight library such as `ws`.
+The `algaguard-realtime-service` provides live React and Flutter updates without changing the device protocol or becoming a system of record. It is an independently deployable Node.js and TypeScript service using native RFC 6455 WebSockets through `ws`.
 
 ## Transport boundaries
 
@@ -56,6 +56,10 @@ flowchart LR
 
 Access to one connection does not imply access to every organization or device. Revocation removes affected active subscriptions. WSS is mandatory outside explicitly local development. Clients obtain a new ticket after each disconnect.
 
+Device subscriptions use `deviceUuid`. Trusted telemetry events carry `organizationId`, `deviceUuid`, canonical `deviceId`, and `ownershipVersion`; canonical ID is display/reference data, not the authorization key. Realtime accepts only schema-valid `telemetry.committed`, routes by organization and UUID, and emits compatible `telemetry.updated` v1.1. Missing organization, invalid UUID, or malformed canonical ID is rejected and counted.
+
+The implementation has no authorization cache on the delivery-critical path and rechecks Access at event time. Membership revocation or ownership transfer therefore removes an old subscription before a future event is delivered. See [ADR-018](../decisions/ADR-018-dual-device-identity.md).
+
 ## Event sources and ownership
 
 | Producer or source                             | Realtime events                                  |
@@ -77,6 +81,6 @@ PostgreSQL service databases and TimescaleDB remain authoritative. Redis Pub/Sub
 
 The service uses OpenTelemetry and exposes health/readiness endpoints, structured logs, connection/subscription metrics, and bounded resource use. The same container image runs with Docker Compose on AWS EC2 and on the campus Linux server. It must not depend on AWS API Gateway WebSocket APIs, AppSync, Firebase Realtime Database, Firebase Cloud Messaging, Socket.IO wire semantics, or a provider-specific hostname.
 
-Implementation must define heartbeat/ping, idle timeout, maximum subscriptions, maximum frame size, rate limiting, bounded outbound queues, slow-client handling, and backpressure closure. Exact values are **TBD** pending implementation load tests and capacity evidence.
+The implementation defines heartbeat/ping, idle timeout, maximum subscriptions, maximum frame size, rate limiting, bounded outbound queues, slow-client handling, and backpressure closure. Production values and capacity remain **TBD** pending deployment-specific load tests.
 
-The wire contracts are owned by [`algaguard-contracts`](https://github.com/AlgaGuard/algaguard-contracts). See [ADR-017](../decisions/ADR-017-websocket-realtime-service.md), [event flow](event-flow.md), and [client experience](../product/realtime-user-experience.md).
+The wire contracts are owned by [`algaguard-contracts`](https://github.com/AlgaGuard/algaguard-contracts). See [ADR-017](../decisions/ADR-017-websocket-realtime-service.md), [ADR-018](../decisions/ADR-018-dual-device-identity.md), [event flow](event-flow.md), and [client experience](../product/realtime-user-experience.md).

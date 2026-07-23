@@ -1,6 +1,6 @@
 # Open questions
 
-This is the authoritative unresolved list as of 2026-07-22.
+This is the authoritative unresolved list as of 2026-07-23.
 
 ## Hardware and safety
 
@@ -27,8 +27,9 @@ This is the authoritative unresolved list as of 2026-07-22.
 ## Data and operations
 
 - `TBD`: Exact serialized and database telemetry record sizes and compression.
-- `TBD`: Application-acknowledgement durability boundary, maximum MQTT message size, and replay limits.
+- `TBD`: Production maximum MQTT message size and replay limits. The development application acknowledgement now follows the durable telemetry commit.
 - `TBD`: Retention/job schedules after measured cost and capacity.
+- `TBD`: Whether a future explicit audit role may access pre-transfer telemetry. The current safe default denies the new owner pre-transfer history while retaining raw ingest ownership for audit.
 - `TBD`: Device credential provisioning/rotation, OTA signing-key custody, and anti-rollback policy.
 - `TBD`: Repository documentation license.
 

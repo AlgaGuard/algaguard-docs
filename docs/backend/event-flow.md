@@ -4,6 +4,8 @@
 flowchart LR
     ESP["ESP32"] -->|"MQTT/TLS QoS 1"| EMQX["EMQX"]
     EMQX -->|"Pilot direct path"| INGEST["MQTT Ingestion Service"]
+    INGEST -->|"Resolve canonical deviceId"| DEVICE["Device Service"]
+    DEVICE -->|"Trusted UUID, organization, version"| INGEST
     INGEST --> TELEMETRY["Telemetry Service"]
     TELEMETRY --> DB[("TimescaleDB")]
     TELEMETRY --> ACK["Application Ack"]
@@ -21,7 +23,7 @@ The ESP32 never connects to Kafka. Kafka is absent from the free pilot and is in
 
 ## Realtime client flow
 
-**CONFIRMED Phase 2.1:** Authoritative services publish live-notification events to Redis Pub/Sub after committing state. The planned Realtime Service validates each outgoing event, maps it to Access Service-authorized active subscriptions, and sends it to React and Flutter over WSS.
+**CONFIRMED:** Authoritative services publish live-notification events to Redis Pub/Sub after committing state. The Realtime Service validates each outgoing event, maps it to Access Service-authorized active subscriptions, and sends it to React and Flutter over WSS.
 
 ```mermaid
 flowchart LR
@@ -44,9 +46,12 @@ React and Flutter submit commands through authenticated and authorized HTTPS RES
 ## Telemetry rules
 
 - A normal MQTT message carries roughly ten one-second samples.
-- Validate device identity, schema version, batch metadata, sample count, sequence continuity, size, timestamp quality, and parameter encoding.
-- Enforce idempotency with `deviceId + sequence`; duplicate QoS 1 delivery is expected.
-- Publish an application acknowledgement only after the ingestion acceptance boundary defined in Phase 2. MQTT broker acknowledgement alone is not enough.
+- Validate topic/payload canonical `deviceId`, schema version, batch metadata, sample count, sequence continuity, size, timestamp quality, and parameter encoding.
+- Reject device-supplied `organizationId`; resolve `deviceUuid`, trusted organization, lifecycle, and `ownershipVersion` through Device Service.
+- Enforce idempotency with canonical device and batch/sequence identity; duplicate QoS 1 delivery is expected.
+- Persist `organizationIdAtIngest` and ownership version. Reject stale context rather than accepting under an outdated owner.
+- Emit `telemetry.committed` and publish an application acknowledgement only after the TimescaleDB transaction commits. MQTT broker acknowledgement alone is not enough.
+- Realtime transforms the trusted committed event to compatible `telemetry.updated` v1.1 and routes by organization plus UUID.
 - Use bounded retries, backpressure, maximum message size, and explicit rejection reasons.
 
-See the [Realtime Service](realtime-service.md) and [ADR-017](../decisions/ADR-017-websocket-realtime-service.md).
+See the [Realtime Service](realtime-service.md), [ADR-017](../decisions/ADR-017-websocket-realtime-service.md), and [ADR-018](../decisions/ADR-018-dual-device-identity.md).

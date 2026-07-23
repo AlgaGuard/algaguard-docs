@@ -19,6 +19,10 @@ Phase 2.1 WebSocket contracts and architecture are complete on `develop`. The pl
 
 The portable Compose stack, service repositories, React dashboard, Flutter application, realtime path, onboarding/claim flow, OTA control plane, and USB-only ESP32-S3 foundation are implemented on their respective `develop` branches. Local automated validation proves the software vertical slice. AWS/campus deployment, real-board tests, signing-custody approval, battery/power safety, MicroSD electrical validation, and scientific thresholds remain open.
 
+## Device identity resolution
+
+**CONFIRMED:** Canonical device IDs remain the firmware and MQTT identity. Internal UUIDs are the authoritative REST, authorization and WebSocket resource identity. Organization context is added only by trusted backend services. The mapping, restart, negative-input, duplicate-replay, and no-leak ownership-transfer paths are implemented and validated on `develop`; see [ADR-018](docs/decisions/ADR-018-dual-device-identity.md).
+
 ## Start here
 
 - [System overview](docs/architecture/system-overview.md)
@@ -34,6 +38,7 @@ The portable Compose stack, service repositories, React dashboard, Flutter appli
 - [ADR-015: Campus final host](docs/decisions/ADR-015-campus-final-host.md)
 - [ADR-016: S3-compatible storage](docs/decisions/ADR-016-s3-compatible-storage.md)
 - [ADR-017: Portable WebSocket Realtime Service](docs/decisions/ADR-017-websocket-realtime-service.md)
+- [ADR-018: Dual device identity](docs/decisions/ADR-018-dual-device-identity.md)
 - [Implementation roadmap](docs/project-management/implementation-roadmap.md)
 - [Phase 1 checklist](docs/project-management/phase-01-checklist.md)
 - [Open questions](docs/project-management/open-questions.md)

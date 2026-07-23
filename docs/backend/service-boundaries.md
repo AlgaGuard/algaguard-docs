@@ -1,6 +1,6 @@
 # Service and repository boundaries
 
-Status: planned interfaces. Phase 2 base contracts and Phase 2.1 WebSocket contracts are defined; runtime services remain planned.
+Status: core platform services and identity path implemented on `develop`; later alert, notification, audit, Kafka, and production-capacity work remains planned.
 
 ## Shared service rules
 
@@ -20,33 +20,34 @@ Status: planned interfaces. Phase 2 base contracts and Phase 2.1 WebSocket contr
 - Image: `ghcr.io/algaguard/algaguard-api-gateway`. Phase 7.
 - Pilot role: one client entry. Scale role: horizontally scalable policy/routing layer.
 
-## `algaguard-realtime-service` - planned
+## `algaguard-realtime-service`
 
-- Purpose: authenticated native RFC 6455 WSS connections, Access Service-authorized organization/device/current-user subscriptions, schema validation, and non-durable live fan-out.
+- Purpose: authenticated native RFC 6455 WSS connections, Access Service-authorized organization/device/current-user subscriptions, schema validation, and non-durable live fan-out by trusted organization and UUID.
 - Technology: Node.js, TypeScript, a lightweight WebSocket library such as `ws`, Redis Pub/Sub, and OpenTelemetry.
 - Owned data: no authoritative business data; connection, subscription, ticket-consumption, and bounded delivery state only.
-- Incoming: WSS upgrades using one-time tickets and subscribe/unsubscribe/ping messages; Redis Pub/Sub notifications from authoritative services; authorization and revocation results from Access Service.
+- Incoming: WSS upgrades using one-time tickets and subscribe/unsubscribe/ping messages; trusted Redis `telemetry.committed`; authorization and revocation results from Access Service.
 - Outgoing: validated WebSocket events to React and Flutter; Access Service authorization checks; connection/subscription telemetry.
 - HTTP: health/readiness only plus internal integration as approved. MQTT: none. WebSocket contract: `algaguard-websocket-v1` in `algaguard-contracts`.
-- Image: `ghcr.io/algaguard/algaguard-realtime-service`. Implementation phase **TBD** after Phase 2.1; the repository is not created yet.
-- Pilot role: optional live dashboard updates after implementation. Scale role: independently scalable, bounded connections and queues with slow-client backpressure.
+- Device identity: subscription `resourceId` is `deviceUuid`; `deviceId` is display/reference only. Delivery requires matching trusted `organizationId` and event-time Access authorization.
+- Image: `ghcr.io/algaguard/algaguard-realtime-service`.
+- Pilot role: implemented live dashboard/mobile updates. Scale role: independently scalable, bounded connections and queues with slow-client backpressure.
 - Authoritative data: none. TimescaleDB and service-owned PostgreSQL databases remain authoritative; clients recover through HTTPS after reconnect.
 
 ## `algaguard-device-service`
 
-- Purpose: registry, claim codes, device identity metadata, tank association, active profile version, hardware/firmware health.
-- Owned data: devices, claims, tank associations, device state references.
+- Purpose: authoritative canonical-ID/UUID/organization/lifecycle mapping, claim codes, tank association, active profile version, hardware/firmware health.
+- Owned data: UUID-keyed devices, immutable unique canonical IDs, current organization and lifecycle, monotonic ownership version/history, claims, tank associations, device state references.
 - Incoming: gateway HTTP; validated status from ingestion; profile assignment reference. Outgoing: command/config requests and audit events.
-- MQTT: consumes no broker topic directly in the target boundary. HTTP: planned `/devices`, `/devices/{id}`, `/devices/{id}/claim`, `/devices/{id}/profile`.
+- MQTT: consumes no broker topic directly. HTTP includes UUID public resources and authenticated internal canonical/UUID context resolution; the internal endpoint is not routed through public NGINX.
 - Events: `DeviceRegistered`, `DeviceClaimed`, `DeviceHealthUpdated`, `DeviceProfileAssigned`.
 - Image: `ghcr.io/algaguard/algaguard-device-service`. Phases 8 and 10.
 - Pilot role: register/claim demo device. Scale role: indexed registry and lifecycle state for 1,000 devices.
 
 ## `algaguard-access-service`
 
-- Purpose: organizations, membership, device sharing, invitations, roles, ownership transfer, revocation.
+- Purpose: organizations, membership, device sharing, invitations, roles, ownership transfer, revocation, and UUID resource authorization.
 - Owned data: organizations, organization/device memberships, invitations, role grants, ownership records.
-- Incoming: gateway HTTP and Keycloak subject IDs. Outgoing: authorization decisions, invitation requests, audit events.
+- Incoming: gateway HTTP, Keycloak subject IDs, and authenticated internal authorization requests. Outgoing: decisions based on live Device Service context, invitation requests, audit events.
 - MQTT: none. HTTP: planned `/organizations`, `/organizations/{id}/members`, `/devices/{id}/members`, `/invitations`, `/authorizations/check`.
 - Events: `InvitationCreated`, `MembershipChanged`, `AccessRevoked`, `OwnershipTransferred`.
 - Image: `ghcr.io/algaguard/algaguard-access-service`. Phase 9.
@@ -64,9 +65,9 @@ Status: planned interfaces. Phase 2 base contracts and Phase 2.1 WebSocket contr
 
 ## `algaguard-telemetry-service`
 
-- Purpose: validate batches, enforce idempotency, store telemetry, maintain latest values/aggregates, serve history.
-- Owned data: telemetry records, aggregates, ingestion/idempotency metadata.
-- Incoming: direct internal request/event from MQTT ingestion; later Kafka events; gateway queries. Outgoing: acceptance result, telemetry events, alert inputs.
+- Purpose: validate trusted batches, reject stale ownership context, enforce idempotency, store telemetry, publish post-commit events, maintain latest values/aggregates, and serve organization-filtered UUID history.
+- Owned data: telemetry records with UUID/canonical ID/organization/version at ingest, aggregates, ingestion/idempotency metadata.
+- Incoming: authenticated internal request from MQTT ingestion; later Kafka events; gateway queries. Outgoing: durable application-ack result and trusted `telemetry.committed` after transaction commit.
 - MQTT: none directly in the target boundary. HTTP: planned internal `/ingestion/batches`; public `/devices/{id}/telemetry` and `/devices/{id}/latest`.
 - Events: `TelemetryBatchAccepted`, `TelemetryBatchRejected`, `TelemetryAggregateReady`.
 - Image: `ghcr.io/algaguard/algaguard-telemetry-service`. Phase 6.
@@ -124,13 +125,15 @@ Status: planned interfaces. Phase 2 base contracts and Phase 2.1 WebSocket contr
 
 ## `algaguard-mqtt-ingestion-service`
 
-- Purpose: subscribe to EMQX, authenticate broker delivery context, validate envelopes, route telemetry/status/results, publish application acknowledgements.
+- Purpose: subscribe to EMQX, validate canonical topic/payload identity, resolve trusted Device context, route enriched telemetry/status/results, and publish application acknowledgements.
 - Owned data: no business record; may keep short-lived deduplication/retry state.
-- Incoming MQTT: `devices/{deviceId}/telemetry/batches`, `devices/{deviceId}/status`, `devices/{deviceId}/command-results`.
-- Outgoing MQTT: `devices/{deviceId}/telemetry/acks` and authorized responses; internal HTTP/event calls to Telemetry and Device services.
+- Incoming MQTT: versioned canonical `algaguard/v1/devices/{deviceId}/...` topics according to the contracts.
+- Outgoing MQTT: canonical device application acknowledgements and authorized responses; authenticated internal calls carrying Device-resolved UUID, organization, and ownership version.
 - HTTP: health/readiness and internal diagnostics only. Events: normalized `TelemetryBatchReceived`, `DeviceStatusReceived`, `CommandResultReceived`.
 - Image: `ghcr.io/algaguard/algaguard-mqtt-ingestion-service`. Phase 6.
 - Pilot role: direct EMQX ingestion. Scale role: independently scalable consumers or replacement input from bridge/Kafka after ADR/load evidence.
+
+The identity boundary across these services is authoritative in [ADR-018](../decisions/ADR-018-dual-device-identity.md).
 
 ## `algaguard-mqtt-kafka-bridge` - later only
 

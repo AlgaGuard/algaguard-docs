@@ -10,6 +10,7 @@ The platform-first phase establishes a portable development stack, service bound
 - `CONFIRMED`: Backend services use Node.js 22, TypeScript, and Express. The web client uses React, TypeScript, Vite, React Router, TanStack Query, and native WebSocket. The mobile client uses Flutter, Riverpod, Dio, secure storage, QR scanning, BLE abstractions, and native WebSocket.
 - `CONFIRMED`: The firmware target is ESP32-S3-DevKitC-1 N16R8 with PlatformIO and ESP-IDF. Runtime diagnostics must verify the actual chip, flash, and PSRAM before physical acceptance.
 - `CONFIRMED`: Local automated validation exercises identity, one-time device claim, immutable profile versions, MQTT ingestion, durable telemetry storage, application acknowledgement, WSS fan-out, commands, and OTA assignment.
+- `CONFIRMED`: The identity-resolution E2E additionally proves canonical `deviceId` to internal UUID/organization mapping, five-service restart persistence, ownership version increment, transfer rerouting, pre-transfer history isolation, stale-context rejection, and duplicate replay without deleting persistent volumes.
 - `TBD`: AWS EC2 deployment needs an approved account, host, DNS/TLS configuration, and cost owner. Campus deployment needs the final Linux host and operator approval.
 - `TBD`: A real ESP32-S3 has not been flashed or bench-tested as part of the automated software evidence.
 - `SAFETY`: This prototype is powered by USB only. It contains no 3S battery, charger, battery percentage, power-path, or battery ADC implementation.
@@ -78,7 +79,7 @@ sequenceDiagram
     ESP->>ESP: Reclaim acknowledged queue records
 ```
 
-Firmware produces deterministic, schema-bounded simulated temperature, pH, light, nitrate, phosphate, and potassium values once per second and batches about ten samples. Every sample carries `SIMULATED`, timestamp quality, a decimal-string sequence, and an active profile reference. MQTT QoS 1 is transport delivery only: pending queue data is retained until the application ACK follows the durable TimescaleDB commit.
+Firmware produces deterministic, schema-bounded simulated temperature, pH, light, nitrate, phosphate, and potassium values once per second and batches about ten samples. Every sample carries `SIMULATED`, timestamp quality, a decimal-string sequence, and an active profile reference. MQTT QoS 1 is transport delivery only: pending queue data is retained until the application ACK follows the durable TimescaleDB commit. MQTT continues to use canonical `deviceId`; trusted UUID and organization context are added by the backend as defined in [ADR-018](../decisions/ADR-018-dual-device-identity.md).
 
 ## Realtime browser and mobile updates
 
