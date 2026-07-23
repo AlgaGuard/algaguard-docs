@@ -1,6 +1,6 @@
 # Firmware overview
 
-Status: Phase 1 design only; no firmware is implemented in this repository.
+Status: Phase 1 design baseline. The separate firmware repository now contains a buildable and host-tested credential foundation; physical ESP32 execution remains unverified.
 
 `CONFIRMED`: The firmware target is PlatformIO with ESP-IDF, C/C++, FreeRTOS, the `esp32-s3-devkitc-1` board ID, native USB, and UART fallback.
 
@@ -15,4 +15,8 @@ The device plans to:
 - cache the active user-defined algae profile for local threshold alerts;
 - accept configuration/commands and later perform signed HTTPS OTA with rollback.
 
-BLE provisioning through Flutter is the planned user path. SoftAP is a development fallback. See [components](firmware-components.md), [tasks](freertos-task-design.md), and [offline storage](offline-storage-design.md).
+**CONFIRMED:** The credential foundation defines local non-exportable key handles, CSR submission, bounded public certificate/chain storage, exact `deviceId`/SAN `deviceUuid` validation, configurable MQTT TLS endpoint loading, a two-certificate rotation state machine, recovery, revoked/expired handling, log redaction, and synchronized/unsynchronized-time decisions. It does not embed a development CA private key.
+
+**TBD:** Encrypted NVS/flash integration, secure-boot/flash-encryption policy, real TLS/CSR execution on the ESP32, and real-board storage/memory behavior still require physical validation. No secure element is claimed.
+
+BLE provisioning through Flutter is the planned user path. SoftAP is a development fallback. See [components](firmware-components.md), [tasks](freertos-task-design.md), [offline storage](offline-storage-design.md), the [credential lifecycle](../backend/device-credential-lifecycle.md), and [transport limits](../architecture/transport-security-limits.md).
