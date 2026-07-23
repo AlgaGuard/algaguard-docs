@@ -22,7 +22,7 @@ HTTP polling only; WebSockets; direct Kafka connection; AWS IoT Core as a mandat
 
 ## Consequences
 
-Topic ACLs, device credentials, duplicate handling, maximum message size, and schemas require explicit contracts.
+Topic ACLs, device credentials, duplicate handling, maximum message size, and schemas require explicit contracts. Per-device X.509 identity, exact ACLs, rotation, and revocation are now governed by [ADR-019](ADR-019-per-device-x509-credentials.md); current finite bounds are recorded in [transport security limits](../architecture/transport-security-limits.md).
 
 ## Benefits
 

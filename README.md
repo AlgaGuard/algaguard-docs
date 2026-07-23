@@ -23,6 +23,12 @@ The portable Compose stack, service repositories, React dashboard, Flutter appli
 
 **CONFIRMED:** Canonical device IDs remain the firmware and MQTT identity. Internal UUIDs are the authoritative REST, authorization and WebSocket resource identity. Organization context is added only by trusted backend services. The mapping, restart, negative-input, duplicate-replay, and no-leak ownership-transfer paths are implemented and validated on `develop`; see [ADR-018](docs/decisions/ADR-018-dual-device-identity.md).
 
+## Production device credential foundation
+
+**CONFIRMED:** Each simulated device generates its private key locally, submits a CSR through one-time bootstrap authorization, and uses its own X.509 certificate for EMQX mutual TLS. Exact topic ACLs, persistent rotation/revocation, restart recovery, and authenticated telemetry/profile/command/OTA flows are locally validated. See [ADR-019](docs/decisions/ADR-019-per-device-x509-credentials.md), the [device credential lifecycle](docs/backend/device-credential-lifecycle.md), and [transport limits](docs/architecture/transport-security-limits.md).
+
+**TBD:** Production CA selection, cloud/campus deployment, public DNS, and physical ESP32 validation remain open.
+
 ## Start here
 
 - [System overview](docs/architecture/system-overview.md)
@@ -39,6 +45,9 @@ The portable Compose stack, service repositories, React dashboard, Flutter appli
 - [ADR-016: S3-compatible storage](docs/decisions/ADR-016-s3-compatible-storage.md)
 - [ADR-017: Portable WebSocket Realtime Service](docs/decisions/ADR-017-websocket-realtime-service.md)
 - [ADR-018: Dual device identity](docs/decisions/ADR-018-dual-device-identity.md)
+- [ADR-019: Per-device X.509 credentials](docs/decisions/ADR-019-per-device-x509-credentials.md)
+- [Device credential lifecycle](docs/backend/device-credential-lifecycle.md)
+- [Transport security limits](docs/architecture/transport-security-limits.md)
 - [Implementation roadmap](docs/project-management/implementation-roadmap.md)
 - [Phase 1 checklist](docs/project-management/phase-01-checklist.md)
 - [Open questions](docs/project-management/open-questions.md)
