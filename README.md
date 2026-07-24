@@ -29,6 +29,14 @@ The portable Compose stack, service repositories, React dashboard, Flutter appli
 
 **TBD:** Production CA selection, cloud/campus deployment, public DNS, and physical ESP32 validation remain open.
 
+## Shared development environment
+
+The portable local stack now has an isolated development Compose project,
+local HTTPS/WSS, MQTT TLS, idempotent migrations, and branded client assets.
+The authenticated demo seed and complete end-to-end smoke suite remain open
+because the current application data model has no tank resource or approved
+demo-user mapping. See the [shared development environment guide](docs/architecture/shared-development-environment.md).
+
 ## Start here
 
 - [System overview](docs/architecture/system-overview.md)
@@ -48,6 +56,7 @@ The portable Compose stack, service repositories, React dashboard, Flutter appli
 - [ADR-019: Per-device X.509 credentials](docs/decisions/ADR-019-per-device-x509-credentials.md)
 - [Device credential lifecycle](docs/backend/device-credential-lifecycle.md)
 - [Transport security limits](docs/architecture/transport-security-limits.md)
+- [Shared development environment](docs/architecture/shared-development-environment.md)
 - [Implementation roadmap](docs/project-management/implementation-roadmap.md)
 - [Phase 1 checklist](docs/project-management/phase-01-checklist.md)
 - [Open questions](docs/project-management/open-questions.md)
